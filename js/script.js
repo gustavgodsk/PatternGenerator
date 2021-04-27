@@ -3,7 +3,10 @@ const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 const select = document.querySelector("select")
 select.value = "cOne"
+const select2 = document.getElementById("select2")
+select2.value = "source-over"
 const resetBtn = document.getElementById("resetBtn")
+const blackBtn = document.getElementById("blackBtn")
 const resetAllBtn = document.getElementById("resetAllBtn")
 const noiseBtn = document.getElementById("noiseBtn")
 const navShow = document.getElementById("navShow")
@@ -115,15 +118,30 @@ setInterval(function update() {
 //Generate Dots
 function GenerateDots(mouseX, mouseY){
 
+    c.globalCompositeOperation = select2.value
+    radiusFirst = true;
+    numberFirst = true;
+    widthFirst = true;
+
+    if (/[a-z]/i.test(radiusField.value) === true){
+        console.log("Invalid radius")
+        return;
+    }
+    if (/[a-z]/i.test(widthField.value) === true){
+        console.log("Invalid radius")
+        return;
+    }
+    if (/[a-z]/i.test(numberField.value) === true){
+      console.log("Invalid amount of dots to create")
+      return; 
+    }
+
     if (numberField.value == ""){
         if (mouseX && mouseY){
             this.repetitions = 1
         } else {
             this.repetitions = (Math.random() * 19) + 1
         }
-    } else if (/[a-z]/i.test(numberField.value) === true){
-        alert("Invalid amount of dots to create")
-        return;
     } else if (/[a-z]/i.test(numberField.value) === false){
         if (mouseX && mouseY){
             this.repetitions = 1
@@ -158,9 +176,6 @@ for (t = 0; t < repetitions; t++){
 
     if (radiusField.value === ""){
         this.radius = (Math.random() * 19) + 1
-    } else if (/[a-z]/i.test(radiusField.value) === true){
-        alert("Invalid radius")
-        return;
     } else if (/[a-z]/i.test(radiusField.value) === false && radiusField.value !== ""){
         this.radius = radiusField.value
     }
@@ -280,9 +295,6 @@ if (mouseX && mouseY){
 } else {
     console.log(`You pressed E: generated ${dotsGenerated} dots!`)
 }
-radiusFirst = true;
-numberFirst = true;
-widthFirst = true;
 }
 
 
@@ -326,19 +338,47 @@ function GeneratePixels(noise){
     widthFirst = true;
 }
 
+function checkForInvalidValue(){
+
+}
+
+addEventListener("keyup", function checkForInvalidValue(){
+  if (!isNaN(radiusField.value)){
+    radiusField.style.background = "#e7e7e7"
+  } else if (isNaN(radiusField.value)){
+    radiusField.style.background = "rgb(243, 81, 81)"
+  }
+
+  if (!isNaN(numberField.value)){
+    numberField.style.background = "#e7e7e7"
+  } else if (isNaN(numberField.value)){
+    numberField.style.background = "rgb(243, 81, 81)"
+  }
+
+  if (!isNaN(widthField.value)){
+    widthField.style.background = "#e7e7e7"
+  } else if (isNaN(widthField.value)){
+    widthField.style.background = "rgb(243, 81, 81)"
+  }
+})
+
 addEventListener("focusin", () =>{
     if (document.activeElement !== radiusField){
         radiusFirst = true;
+        radiusField.value = radiusField.value.trim()
     }
     if (document.activeElement !== numberField){
         numberFirst = true;
+        numberField.value = numberField.value.trim()
     }
     if (document.activeElement !== widthField){
         widthFirst = true;
+        widthField.value = widthField.value.trim()
     }
 })
 
 addEventListener("keydown", function(e) {
+
     if (document.activeElement == radiusField){
         if (radiusFirst === true){
             radiusField.value = ""
@@ -391,6 +431,12 @@ function resetAll (){
 resetBtn.addEventListener("click", () => {
     console.log("Generated background!")
     GeneratePixels()
+})
+
+blackBtn.addEventListener("click", () => {
+  c.globalCompositeOperation = "source-over"
+  c.fillStyle = "black";
+  c.fillRect(0, 0, canvas.width, canvas.height);
 })
 
 resetAllBtn.addEventListener("click", () => {
