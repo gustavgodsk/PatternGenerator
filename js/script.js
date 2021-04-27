@@ -325,6 +325,9 @@ function GeneratePixels(noise){
             } else if (noise === "white"){
                 const alpha = 0
                 DrawPixel(i, ii, alpha)
+            } else if (noise === "black"){
+                const alpha = 255
+                DrawPixel(i, ii, alpha)
             } else {
                 const alpha = (alphaY + alphaX) / 2
                 DrawPixel(i, ii, alpha)
@@ -412,7 +415,10 @@ addEventListener("keydown", function(e) {
         } else if (e.key === "n" || e.key === "N"){
             GeneratePixels("true")
             firstF = true
-        }
+        } else if (e.key === "b" || e.key === "B"){
+          GeneratePixels("black")
+            firstF = true
+      }
     }
 })
 
@@ -434,9 +440,7 @@ resetBtn.addEventListener("click", () => {
 })
 
 blackBtn.addEventListener("click", () => {
-  c.globalCompositeOperation = "source-over"
-  c.fillStyle = "black";
-  c.fillRect(0, 0, canvas.width, canvas.height);
+    GeneratePixels("black")
 })
 
 resetAllBtn.addEventListener("click", () => {
