@@ -542,7 +542,9 @@ addEventListener("keydown", function(e) {
             drawDot = false
         } else if (e.key === "q" || e.key === "Q"){
             if (isMoving) {isMoving = false} else {isMoving = true}
-        } 
+        } else if (e.key === "p" || e.key === "P"){
+          if (buttonDiv.style.visibility == "visible") {hideNav()} else {showNav()}
+      } 
 
         if (e.key === "w" || e.key === "W" || 
             e.key === "a" || e.key === "A" || 
@@ -587,16 +589,24 @@ noiseBtn.addEventListener("click", () => {
     firstrun = true;
 })
 
+function showNav(){
+  buttonDiv.style.visibility = "visible";
+  helpDiv.style.visibility = "visible";
+  navShow.style.visibility = "hidden";
+  navHide.style.visibility = "visible";
+}
+
+function hideNav(){
+  buttonDiv.style.visibility = "hidden";
+  helpDiv.style.visibility = "hidden";
+  navHide.style.visibility = "hidden";
+  navShow.style.visibility = "visible";
+}
+
 navShowImg.addEventListener("click", () => {
-    buttonDiv.style.visibility = "visible";
-    helpDiv.style.visibility = "visible";
-    navShow.style.visibility = "hidden";
-    navHide.style.visibility = "visible";
+  showNav()
 })
 
 navHideImg.addEventListener("click", () => {
-    buttonDiv.style.visibility = "hidden";
-    helpDiv.style.visibility = "hidden";
-    navHide.style.visibility = "hidden";
-    navShow.style.visibility = "visible";
+  hideNav()
 })
