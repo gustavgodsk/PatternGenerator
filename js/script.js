@@ -12,6 +12,7 @@ const noiseBtn = document.getElementById("noiseBtn")
 const navShow = document.getElementById("navShow")
 const navHide = document.getElementById("navHide")
 const buttonDiv = document.getElementById("buttonDiv")
+const helpDiv = document.querySelector(".helpDiv")
 const textDiv = document.querySelector(".textDiv")
 const radiusField = document.getElementById("radiusField")
 const numberField = document.getElementById("numberField")
@@ -39,8 +40,15 @@ let firstF = true;
 let radiusFirst = true;
 let numberFirst = true;
 let widthFirst = true;
+let speedFirst = true;
 let radiusFocused = false;
 let numberFocused = false;
+let dontConnect = false;
+let popDots = false;
+let drawDot = true;
+let drawLine = true;
+
+let velocity = {x: 0, y: 0}
 
 //Dot properties
 class Dot {
@@ -75,7 +83,7 @@ canvas.addEventListener("mousemove", (e) => {
     }
 })
 
-canvas.addEventListener("mouseup", (e) => {
+canvas.addEventListener("mouseup", () => {
     isDrawing = false
 })
 
@@ -95,7 +103,7 @@ setInterval(function update() {
         firstPause = true;
         document.body.style.cursor = "default"
     }
-    if (time == 100){
+    if (time == 200){
         document.body.style.cursor = "none"
         if (firstPause == true){
             c2.fillStyle = "rgba(0,0,0,1)";
@@ -110,18 +118,21 @@ setInterval(function update() {
             c2.fillStyle = "rgba(" + Math.random() * 255 + "," + Math.random() * 255 + ",255," + Math.random() + ")";
             c2.fill() 
         }
-    } else if (time < 100){
+    } else if (time < 200){
         time++
     }
 }, 1000/15)
 
 //Generate Dots
-function GenerateDots(mouseX, mouseY){
+function GenerateDots(mouseX, mouseY, moving){
 
+    if (moving !== true){
+      radiusFirst = true;
+      numberFirst = true;
+      widthFirst = true;
+      speedFirst = true;
+    }
     c.globalCompositeOperation = select2.value
-    radiusFirst = true;
-    numberFirst = true;
-    widthFirst = true;
 
     if (/[a-z]/i.test(radiusField.value) === true){
         console.log("Invalid radius")
@@ -152,8 +163,8 @@ function GenerateDots(mouseX, mouseY){
             } else if (numberField.value < 0){
                 alert("Cannot create a negative amount of dots")
                 return
-            } else if (select.value == "cAll" && numberField.value > 500){
-                alert("Cannot create more than 500 dots while 'Connect All' is selected")
+            } else if (select.value == "cAll" && numberField.value > 100){
+                alert("Cannot create more than 100 dots while 'Connect All' is selected")
                 return
             } else if (select.value == "cTwo" && numberField.value > 2500){
                 alert("Cannot create more than 2500 dots while 'Last Two' is selected")
@@ -195,9 +206,13 @@ for (t = 0; t < repetitions; t++){
 
     //Draw dot
     const dot = new Dot (x, y, radius, this.color)
-    dots.push(dot)
+    if (!popDots){
+      dots.push(dot)
+    }
+    if (drawDot){
+      dot.draw()
+    }
     textDiv.style.display = "none"
-    dot.draw()
 
     //Line width
     if (widthField.value == ""){
@@ -207,6 +222,7 @@ for (t = 0; t < repetitions; t++){
     }
 
     //Draw line
+    if (!dontConnect && drawLine){
     if (firstrun === true){
         firstrun = false;
         secondrun = true;
@@ -287,7 +303,9 @@ for (t = 0; t < repetitions; t++){
             c.stroke()
         }
 }
+}
 firstF = true;
+drawLine = true;
 }
 const dotsGenerated = Math.floor(this.repetitions)
 if (mouseX && mouseY){
@@ -300,6 +318,16 @@ if (mouseX && mouseY){
 
 //Background & Noise
 function GeneratePixels(noise){
+  if (noise == "true"){
+    helpDiv.style.color = "#e7e7e7"
+    helpDiv.style.background = "rgb(77, 76, 76)"
+  } else if (noise == "black") {
+    helpDiv.style.color = "#e7e7e7"
+    helpDiv.style.background = "transparent"
+  } else {
+    helpDiv.style.color = "black"
+    helpDiv.style.background = "transparent"
+  }
     textDiv.style.display = "none"
     function DrawPixel(x, y, a){
         let index = (x + y * canvas.width) * 4;
@@ -339,13 +367,47 @@ function GeneratePixels(noise){
     radiusFirst = true;
     numberFirst = true;
     widthFirst = true;
+    speedFirst = true;
 }
 
-function checkForInvalidValue(){
+const speedField = document.getElementById("speedField")
+let direction = ""
+function applyVelocity(e){
 
+  speed = parseInt(speedField.value)
+  function getDotPos(){
+    dotXpos = dots[dots.length - 1].x + velocity.x
+    dotYpos = dots[dots.length - 1].y + velocity.y
+  }
+  function changeDirection(dir){
+    if (direction !== dir){
+      velocity.x = 0
+      velocity.y = 0
+      direction = dir
+    }
+  }
+  changeDirection(e.key)
+  if (e.key === "w" || e.key === "W"){
+    velocity.y = -speed
+  } else if (e.key === "a" || e.key === "A"){
+    velocity.x = -speed
+  } else if (e.key === "s" || e.key === "S"){
+    velocity.y = speed
+  } else if (e.key === "d" || e.key === "D"){
+    velocity.x = speed
+  }
+  getDotPos()
+  GenerateDots(dotXpos, dotYpos, true)
 }
 
-addEventListener("keyup", function checkForInvalidValue(){
+let isMoving = false
+setInterval(() => {
+  if (isMoving){
+    applyVelocity(window.currentDir)
+  }
+}, 1000/15);
+
+addEventListener("keyup", function checkForInvalidValue(e){
   if (!isNaN(radiusField.value)){
     radiusField.style.background = "#e7e7e7"
   } else if (isNaN(radiusField.value)){
@@ -362,21 +424,37 @@ addEventListener("keyup", function checkForInvalidValue(){
     widthField.style.background = "#e7e7e7"
   } else if (isNaN(widthField.value)){
     widthField.style.background = "rgb(243, 81, 81)"
+  } 
+
+  if (!isNaN(speedField.value)){
+    speedField.style.background = "#e7e7e7"
+  } else if (isNaN(speedField.value)){
+    speedField.style.background = "rgb(243, 81, 81)"
+  }
+
+  if (e.key === "c" || e.key === "C"){
+    dontConnect = false
+  } 
+  if (e.key === "z" || e.key === "Z"){
+    popDots = false
+  } 
+  if (e.key === "x" || e.key === "X"){
+    drawDot = true
   }
 })
 
 addEventListener("focusin", () =>{
     if (document.activeElement !== radiusField){
         radiusFirst = true;
-        radiusField.value = radiusField.value.trim()
     }
     if (document.activeElement !== numberField){
         numberFirst = true;
-        numberField.value = numberField.value.trim()
     }
     if (document.activeElement !== widthField){
         widthFirst = true;
-        widthField.value = widthField.value.trim()
+    }
+    if (document.activeElement !== speedField){
+        speedFirst = true;
     }
 })
 
@@ -400,9 +478,16 @@ addEventListener("keydown", function(e) {
             widthFirst = false
         }
         return
+    } else if (document.activeElement == speedField){
+      if (speedFirst === true){
+          speedField.value = ""
+          speedFirst = false
+        }
+        return
     } else if (document.activeElement !== radiusField ||
                 document.activeElement !== numberField ||
-                document.activeElement !== widthField){
+                document.activeElement !== widthField ||
+                document.activeElement !== speedField){
         if (e.key === "f" || e.key === "F"){
             if (firstF === true){
                 console.log("You pressed F: generated background!")
@@ -416,9 +501,26 @@ addEventListener("keydown", function(e) {
             GeneratePixels("true")
             firstF = true
         } else if (e.key === "b" || e.key === "B"){
-          GeneratePixels("black")
+            GeneratePixels("black")
             firstF = true
-      }
+        }  else if (e.key === "c" || e.key === "C"){
+            dontConnect = true
+            drawLine = false
+        }  else if (e.key === "z" || e.key === "Z"){
+            popDots = true
+        }  else if (e.key === "x" || e.key === "X"){
+            drawDot = false
+        } else if (e.key === "q" || e.key === "Q"){
+            if (isMoving) {isMoving = false} else {isMoving = true}
+        } 
+
+        if (e.key === "w" || e.key === "W" || 
+            e.key === "a" || e.key === "A" || 
+            e.key === "s" || e.key === "S" || 
+            e.key === "d" || e.key === "D"){
+            isMoving = true
+            window.currentDir = e
+        } 
     }
 })
 
@@ -432,6 +534,7 @@ function resetAll (){
     firstF = true;
     canvas.width = innerWidth
     canvas.height = innerHeight
+    isMoving = false
 }
 
 resetBtn.addEventListener("click", () => {
@@ -455,12 +558,14 @@ noiseBtn.addEventListener("click", () => {
 
 navShowImg.addEventListener("click", () => {
     buttonDiv.style.visibility = "visible";
+    helpDiv.style.visibility = "visible";
     navShow.style.visibility = "hidden";
     navHide.style.visibility = "visible";
 })
 
 navHideImg.addEventListener("click", () => {
     buttonDiv.style.visibility = "hidden";
+    helpDiv.style.visibility = "hidden";
     navHide.style.visibility = "hidden";
     navShow.style.visibility = "visible";
 })
