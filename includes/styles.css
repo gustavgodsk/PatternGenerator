@@ -189,11 +189,12 @@ button {
 }
 
 .helpDiv {
+  font-size: 2vmin;
   position: absolute;
   right: 0%;
-  top: -3%;
+  bottom: 0%;
   visibility: hidden;
   font-family: sans-serif;
   background: transparent;
-  padding: 20px;
+  padding: 0px 20px;
 }

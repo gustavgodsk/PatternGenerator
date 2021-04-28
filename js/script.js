@@ -21,6 +21,7 @@ const navShowImg = document.getElementById("navShowImg")
 const navHideImg = document.getElementById("navHideImg")
 const checkBox = document.getElementById("checkBox")
 const slider = document.getElementById("myRange")
+const refreshRate = document.getElementById("myInterval")
 
 canvas.scrollIntoView()
 
@@ -103,7 +104,7 @@ setInterval(function update() {
         firstPause = true;
         document.body.style.cursor = "default"
     }
-    if (time == 200){
+    if (time == 300){
         document.body.style.cursor = "none"
         if (firstPause == true){
             c2.fillStyle = "rgba(0,0,0,1)";
@@ -118,7 +119,7 @@ setInterval(function update() {
             c2.fillStyle = "rgba(" + Math.random() * 255 + "," + Math.random() * 255 + ",255," + Math.random() + ")";
             c2.fill() 
         }
-    } else if (time < 200){
+    } else if (time < 300){
         time++
     }
 }, 1000/15)
@@ -144,6 +145,10 @@ function GenerateDots(mouseX, mouseY, moving){
     }
     if (/[a-z]/i.test(numberField.value) === true){
       console.log("Invalid amount of dots to create")
+      return; 
+    }
+    if (/[a-z]/i.test(speedField.value) === true){
+      console.log("Invalid speed")
       return; 
     }
 
@@ -321,7 +326,7 @@ function GeneratePixels(noise){
   if (noise == "true"){
     helpDiv.style.color = "#e7e7e7"
     helpDiv.style.background = "rgb(77, 76, 76)"
-  } else if (noise == "black") {
+  } else if (noise == "black" || !noise) {
     helpDiv.style.color = "#e7e7e7"
     helpDiv.style.background = "transparent"
   } else {
@@ -370,14 +375,24 @@ function GeneratePixels(noise){
     speedFirst = true;
 }
 
+// Velocity
 const speedField = document.getElementById("speedField")
 let direction = ""
 function applyVelocity(e){
 
-  speed = parseInt(speedField.value)
+  if (speedField.value == ""){
+    speed = 10
+  } else {speed = parseInt(speedField.value)}
+  
   function getDotPos(){
+    if(dots.length > 0){
     dotXpos = dots[dots.length - 1].x + velocity.x
+    if (dotXpos > canvas.width){dotXpos -= canvas.width; drawLine = false}
+    else if (dotXpos < 0){dotXpos += canvas.width; drawLine = false}
     dotYpos = dots[dots.length - 1].y + velocity.y
+    if (dotYpos > canvas.height){dotYpos -= canvas.height; drawLine = false}
+    else if (dotYpos < 0){dotYpos += canvas.height; drawLine = false}
+    } else {dotXpos = canvas.width / 2; dotYpos = canvas.height / 2}
   }
   function changeDirection(dir){
     if (direction !== dir){
@@ -401,11 +416,26 @@ function applyVelocity(e){
 }
 
 let isMoving = false
-setInterval(() => {
+let alreadyRunning = false
+let interval;
+let t = 1000;
+f1();
+
+function changeTimer (){
+  t = 1000 / refreshRate.value
+}
+function f1 () {
+  if (alreadyRunning) {clearInterval(interval)}
+
+  alreadyRunning = true
   if (isMoving){
     applyVelocity(window.currentDir)
   }
-}, 1000/15);
+  changeTimer()
+  interval = setInterval(f1, t);
+}
+
+
 
 addEventListener("keyup", function checkForInvalidValue(e){
   if (!isNaN(radiusField.value)){
@@ -534,6 +564,7 @@ function resetAll (){
     firstF = true;
     canvas.width = innerWidth
     canvas.height = innerHeight
+    velocity = {x: 0, y: 0}
     isMoving = false
 }
 

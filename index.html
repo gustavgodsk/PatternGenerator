@@ -12,21 +12,24 @@
     </div>
 
     <div id="buttonDiv">
+      <div class="slidecontainer">
+        <input type="range" min="1" max="100" value="50" class="slider" id="myInterval" title="Refresh rate">
+      </div>
         <input name="textField" type="text" id="speedField" placeholder="Speed" title="Speed of dots
 
-        Default: 30" value="30">
+Default: 10">
         <input name="textField" type="text" id="widthField" placeholder="Width" title="Width of connecting line
 
-        Default: 1px
-        Leave empty for same width as dot" value="1">
+Default: 1px
+Leave empty for same width as dot" value="1">
         <input name="textField" type="text" id="radiusField" placeholder="Radius" title=
         "Radius of the dot
         
-        Default: random value between 1 and 20" value="">
+Default: random value between 1 and 20" value="">
         <input name="textField" type="text" id="numberField" placeholder="Dots" title=  
         "Number of dots to create
         
-        Default: random value between 1 and 20" value="">
+Default: random value between 1 and 20" value="">
 
         <select title="Previous dots to connect to" value="cOne">
             <option value="cZero" title="Don't connect to any dots">Connect 0</option>
